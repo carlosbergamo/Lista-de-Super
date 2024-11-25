@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Compras</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 min-h-screen flex flex-col">
+
+    <header class="bg-gray-800 text-white text-center py-4">
+        <h1 class="text-2xl font-bold">🛒 Lista de Compras</h1>
+    </header>
+
+    <main class="flex-1 p-4">
+        <div class="max-w-3xl mx-auto bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-4">Selecciona los productos por categoría</h2>
+
+            <!-- Barra de búsqueda -->
+            <div class="mb-4">
+                <input id="search-bar" type="text" placeholder="Buscar productos..." class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+
+            <!-- Selector de categoría -->
+            <div class="mb-6">
+                <label for="item-category" class="block text-sm font-medium text-gray-700 mb-2">Seleccionar categoría</label>
+                <select id="item-category" class="w-full px-4 py-2 border rounded-lg">
+                    <option value="Frutas y Verduras">🥦 Frutas y Verduras</option>
+                    <option value="Carnes, Pescados y Huevos">🍖 Carnes, Pescados y Huevos</option>
+                    <option value="Lácteos y Derivados">🥛 Lácteos y Derivados</option>
+                    <option value="Cereales y Legumbres">🌾 Cereales y Legumbres</option>
+                    <option value="Congelados">❄️ Congelados</option>
+                    <option value="Snacks y Dulces">🍫 Snacks y Dulces</option>
+                    <option value="Productos de Desayuno y Merienda">☕ Productos de Desayuno y Merienda</option>
+                    <option value="Bebidas">🥤 Bebidas</option>
+                    <option value="Productos de Higiene y Cuidado Personal">🧴 Productos de Higiene y Cuidado Personal</option>
+                    <option value="Productos de Limpieza">🧹 Productos de Limpieza</option>
+                    <option value="Otros esenciales">🌟 Otros esenciales</option>
+                </select>
+            </div>
+
+            <!-- Lista de productos -->
+            <div id="items-container" class="mb-6">
+                <h3 class="text-lg font-semibold mb-2">Productos disponibles</h3>
+                <ul id="available-items" class="space-y-2"></ul>
+            </div>
+
+            <!-- Lista de compras -->
+            <div>
+                <h3 class="text-lg font-semibold mb-2">Tu lista de compras</h3>
+                <ul id="list-container" class="space-y-4"></ul>
+            </div>
+
+            <!-- Botón para limpiar la lista -->
+            <div class="mt-4">
+                <button id="clear-list" class="bg-red-500 text-white px-4 py-2 rounded-lg w-full hover:bg-red-600 transition duration-200">🗑️ Limpiar lista</button>
+            </div>
+
+            <!-- Botón para compartir -->
+            <div class="mt-4">
+                <button id="generate-link" class="bg-green-500 text-white px-4 py-2 rounded-lg w-full hover:bg-green-600 transition duration-200">📤 Compartir por WhatsApp</button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-gray-800 text-white text-center py-4">
+        <p> Desarrollado por Charlie Bérgamo</p>
+    </footer>
+
+    <script>
+        const availableItems = {
+            "Frutas y Verduras": [
+                "Bananas", "Manzanas", "Naranjas", "Uvas", "Peras", "Mandarinas", "Kiwi", "Ananá", "Cerezas", "Melón", "Sandía",
+                "Papaya", "Duraznos", "Arándanos", "Frutillas", "Mango", "Damascos", "Ciruelas", "Purés de fruta envasados",
+                "Zanahorias", "Papas", "Cebollas", "Pimientos", "Zapallo", "Batatas", "Choclo", "Berenjenas", "Zucchini", "Remolacha",
+                "Coliflor", "Espinaca", "Lechuga", "Acelga", "Rúcula", "Kale", "Radicheta", "Tomates cherry", "Pepino", "Palta", "Brócoli",
+                "Hongos frescos", "Ajos", "Jengibre"
+            ],
+            "Carnes, Pescados y Huevos": [
+                "Pollo (pechuga, muslos, alitas, entero)", "Carne vacuna (picada, milanesas, bife, lomo, roast beef)", "Cerdo (bondiola, costillas, carré, jamón crudo o cocido)",
+                "Filetes de merluza", "Salmón", "Trucha", "Calamares", "Camarones", "Mejillones", "Atún fresco", "Atún enlatado",
+                "Huevos de gallina", "Huevos de codorniz"
+            ],
+            "Lácteos y Derivados": [
+                "Leche entera", "Leche descremada", "Leche fortificada para niños", "Leche deslactosada", "Leche de almendras", "Leche de avena",
+                "Yogures naturales", "Yogures con frutas", "Yogures griegos", "Yogures bebibles", "Yogures probióticos", "Queso cremoso",
+                "Queso rallado", "Queso untable", "Queso en fetas", "Queso parmesano", "Ricota", "Mozzarella", "Queso azul", "Brie",
+                "Gouda", "Cheddar", "Crema de leche", "Yogures para bebés"
+            ],
+            "Cereales y Legumbres": [
+                "Avena", "Corn flakes", "Granola", "Arroz inflado", "Muesli", "Quinoa", "Amaranto", "Couscous", "Arroz blanco",
+                "Arroz integral", "Arroz basmati", "Arroz jazmín", "Arroz carnaroli", "Fideos", "Tallarines", "Ravioles", "Ñoquis",
+                "Lasagna", "Capellettis", "Lentejas", "Garbanzos", "Porotos negros", "Porotos rojos", "Porotos manteca", "Arvejas secas",
+                "Pan lactal", "Pan integral", "Pan de molde", "Baguettes", "Pan de campo", "Grisines", "Muffins", "Medialunas",
+                "Tortillas de maíz", "Tortillas de trigo"
+            ],
+            "Congelados": [
+                "Espinaca congelada", "Choclo congelado", "Mix para wok congelado", "Brócoli congelado", "Arvejas congeladas", "Cebolla en cubos congelada",
+                "Hamburguesas de carne", "Hamburguesas de vegetales", "Hamburguesas de pollo", "Hamburguesas de soja", "Papas fritas congeladas",
+                "Papas noisettes congeladas", "Nuggets de pollo congelados", "Bastones de pescado congelados", "Frutillas congeladas", "Mango congelado",
+                "Frutos rojos congelados"
+            ],
+            "Snacks y Dulces": [
+                "Galletitas sin azúcar agregada", "Barras de cereal", "Frutas secas (almendras, nueces, pistachos, castañas)", "Frutas deshidratadas (pasas de uva, damascos, manzana, banana)",
+                "Bocaditos de maíz sin sal", "Chocolate amargo", "Turrones", "Alfajores", "Galletitas integrales", "Mix de frutos secos",
+                "Helados", "Caramelos", "Bombones"
+            ],
+            "Productos de Desayuno y Merienda": [
+                "Café molido", "Café en cápsulas", "Café instantáneo", "Té negro", "Té verde", "Té de hierbas", "Té chai", "Cacao en polvo",
+                "Chocolate para taza", "Mermeladas (frutilla, durazno, ciruela, frutos rojos)", "Miel", "Dulce de leche clásico",
+                "Dulce de leche light", "Facturas", "Bizcochos", "Medialunas", "Galletitas dulces"
+            ],
+            "Bebidas": [
+                "Agua mineral con gas", "Agua mineral sin gas", "Jugos naturales", "Jugos exprimidos", "Jugos en polvo", "Jugos en caja sin azúcar",
+                "Leche chocolatada", "Gaseosas cola", "Gaseosas lima-limón", "Gaseosas de naranja", "Cervezas", "Vinos", "Aperitivos"
+            ],
+            "Productos de Higiene y Cuidado Personal": [
+                "Pañales", "Toallitas húmedas", "Jabón neutro", "Shampoo infantil", "Crema hidratante para niños", "Shampoo para adultos",
+                "Acondicionador", "Crema de afeitar", "Desodorantes", "Pasta dental infantil", "Pasta dental para adultos", "Toallas femeninas",
+                "Tampones", "Copas menstruales", "Hisopos", "Algodón", "Protector solar", "Repelente de insectos"
+            ],
+            "Productos de Limpieza": [
+                "Detergente", "Lavandina", "Desinfectantes multiuso", "Jabón para ropa líquido", "Jabón para ropa en polvo", "Suavizante",
+                "Papel higiénico", "Servilletas", "Papel absorbente", "Bolsas de residuos", "Esponjas", "Trapos de piso"
+            ],
+            "Otros esenciales": [
+                "Aceite de oliva", "Aceite de girasol", "Aceite de coco", "Azúcar blanca", "Azúcar rubia", "Azúcar mascabo", "Sal común",
+                "Sal marina", "Sal baja en sodio", "Orégano", "Pimienta", "Pimentón", "Ajo en polvo", "Curry", "Comino", "Canela",
+                "Vinagre de alcohol", "Vinagre de manzana", "Vinagre balsámico", "Caldos de pollo", "Caldos de carne", "Caldos de verduras",
+                "Harina común", "Harina leudante", "Harina integral", "Harina de almendras"
+            ]
+        };
+
+        const itemCategorySelect = document.getElementById('item-category');
+        const availableItemsList = document.getElementById('available-items');
+        const listContainer = document.getElementById('list-container');
+        const searchBar = document.getElementById('search-bar');
+        const generateLinkBtn = document.getElementById('generate-link');
+        const clearListBtn = document.getElementById('clear-list');
+
+        let shoppingList = JSON.parse(localStorage.getItem('shoppingList')) || [];
+        let filteredItems = [];
+
+        const renderAvailableItems = (category) => {
+            availableItemsList.innerHTML = '';
+            const items = availableItems[category].sort();
+            filteredItems = items;
+            items.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" class="form-checkbox" data-item="${item}" />
+                        <span>${item}</span>
+                    </div>
+                `;
+                availableItemsList.appendChild(li);
+            });
+        };
+
+        const renderShoppingList = () => {
+            listContainer.innerHTML = '';
+            shoppingList.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'flex items-center gap-2';
+                li.innerHTML = `
+                    <span>${item}</span>
+                    <button class="text-red-500 hover:text-red-700 ml-auto transition duration-200" data-remove="${item}">🗑️ Quitar</button>
+                `;
+                listContainer.appendChild(li);
+            });
+        };
+
+        const updateLocalStorage = () => {
+            localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+        };
+
+        generateLinkBtn.addEventListener('click', () => {
+    const groupedList = Object.keys(availableItems).reduce((acc, category) => {
+        const itemsInCategory = shoppingList.filter(item => availableItems[category].includes(item));
+        if (itemsInCategory.length > 0) {
+            acc.push(`${category}:\n${itemsInCategory.map(item => `- ${item}`).join('\n')}`);
+        }
+        return acc;
+    }, []);
+
+    const message = groupedList.length
+        ? `Aquí está mi lista de compras:\n\n${groupedList.join('\n\n')}`
+        : 'Mi lista de compras está vacía.';
+    const whatsappLink = `https://wa.me/?text=${encodeURIComponent(message)}`;
+    window.open(whatsappLink, '_blank');
+});
+
+
+        clearListBtn.addEventListener('click', () => {
+            shoppingList = [];
+            updateLocalStorage();
+            renderShoppingList();
+        });
+
+        itemCategorySelect.addEventListener('change', () => {
+            const category = itemCategorySelect.value;
+            renderAvailableItems(category);
+        });
+
+        availableItemsList.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                shoppingList.push(e.target.dataset.item);
+            } else {
+                shoppingList = shoppingList.filter(item => item !== e.target.dataset.item);
+            }
+            shoppingList = [...new Set(shoppingList)];
+            updateLocalStorage();
+            renderShoppingList();
+        });
+
+        searchBar.addEventListener('input', (e) => {
+            const searchText = e.target.value.toLowerCase();
+            const results = filteredItems.filter(item => item.toLowerCase().includes(searchText));
+            availableItemsList.innerHTML = '';
+            results.forEach(item => {
+                const li = document.createElement('li');
+                li.innerHTML = `
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" class="form-checkbox" data-item="${item}" />
+                        <span>${item}</span>
+                    </div>
+                `;
+                availableItemsList.appendChild(li);
+            });
+        });
+
+        listContainer.addEventListener('click', (e) => {
+            if (e.target.dataset.remove) {
+                shoppingList = shoppingList.filter(item => item !== e.target.dataset.remove);
+                updateLocalStorage();
+                renderShoppingList();
+                renderAvailableItems(itemCategorySelect.value);
+            }
+        });
+
+        renderAvailableItems(itemCategorySelect.value);
+        renderShoppingList();
+    </script>
+
+</body>
+
+</html>
